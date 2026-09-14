@@ -403,3 +403,5 @@ jobs:
     permissions:
       contents: read
     timeout-minutes: 90
+
+# Workflow file touched on 2026-09-14 so GitHub Actions indexes it; no behavioural change.
