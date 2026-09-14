@@ -10,17 +10,33 @@ Static recompilation of **Nightmare Creatures II** built on
 [psxrecomp](https://github.com/mstan/psxrecomp) and
 [recomp-ui](https://github.com/RetroPortingToolKit/recomp-ui).
 
-_Add a short pitch in catalog_identity.json / README._
+This is an owned-input setup kit. You supply your own SLUS-01112 disc image
+and your own SCPH-1001 (USA) BIOS dump; first-run setup generates and compiles the game on
+your machine. The kit and its release archives contain no game disc, retail BIOS,
+generated game code, or saved game.
 
 | | |
 |---|---|
-| Players | 2 |
 | Region | USA |
-| Publisher | - |
-| Year | - |
+| Disc serial | SLUS-01112 |
+| Discs | 1 |
+| Supported dump | Redump `Nightmare Creatures II (USA).cue` as CUE/BIN or CHD |
+| BIOS | SCPH-1001 (USA), 524288 bytes, SHA-256 `71af94d1e47a68c11e8fdb9f8368040601514a42a5a399cda48c7d3bff1e99d3` |
 
-Scaffolded with the New Project Layout. See
-`psxrecomp/docs/GAME_PROJECT_SETUP.md` for the full flow.
+## Setup
+
+1. Download the setup ZIP for your platform from [Releases](https://github.com/Alexbeav/nightmare-creatures-ii-recomp/releases)
+   and extract it into a writable folder.
+2. Start `Nightmare_Creatures_II` (`.exe` on Windows).
+3. In the setup wizard select your disc image (the Redump CUE, or a CHD of the
+   same dump) and your BIOS file.
+4. Run Generate & rebuild and wait for the game to start. The first run compiles
+   the game and takes several minutes.
+
+On Windows the wizard downloads the portable build tools (cmake-clang-v1) or uses
+cmake/ninja already on PATH. On Linux and macOS install CMake, Ninja, Python 3,
+and a C/C++ compiler first. Keep a CUE and every file it references together.
+Setup produces both a normal and a diagnostic build; see *Diagnostic mode* below.
 
 <!-- retcomm-readme-launcher -->
 ## Retro Launcher
@@ -47,6 +63,25 @@ shares the portable toolchain used by per-title launchers, and automates
 BIOS/ROM/save plumbing so you are not stuck repeating each game’s wizard by hand.
 <!-- /retcomm-readme-launcher -->
 
+## Status
+
+Version 0.1.0 release candidate.
+
+- Windows: the exact setup package passed automated clean-extract setup,
+  generation, compilation, and a headless start check on the pinned framework.
+- Windows play testing on the private build this kit derives from: the first build corrupted textures on entering the first room and later showed strips above and below the movies. The DMA stop-boundary correction is in the pinned framework; the movie presentation policy is a title-specific framework override (branch `codex/wave4-c3-ncii-20260914`) accepted by Alex.
+- Linux and macOS: packages are built by CI from the same recipe; native setup
+  and gameplay have not been verified.
+
+Full-game completion, audio fidelity, and multiplayer are not claimed. Runtime
+snapshots from older builds are not qualified compatible; ordinary memory-card
+saves are preserved across updates.
+
+## Known issues
+
+- Startup takes noticeably longer than other titles before the first screen appears.
+- This disc has audio tracks. Select the CUE (or a CHD made from the full dump) so every track is mounted; a Track 01-only BIN fails verification.
+
 ## Diagnostic mode
 
 If the game crashes, freezes, or misbehaves, switch to the diagnostic build
@@ -70,31 +105,21 @@ Default app icon: `assets/psxrecomp.ico` (and `.png` / `.svg`) — Retro-themed 
 
 Box art is not shipped in this kit or its repository. Redistribution permission for third-party cover images is unresolved, so the launcher runs without one.
 
-## Quick start (dev)
+## About this project
 
-```bash
-git submodule update --init --recursive
-./psxrecomp/tools/ci/build_emitters.sh
-python3 psxrecomp/psxrecomp_cli.py generate \
-  --config game.toml --project-root . --disc disc/<your>.cue
-cmake -S . -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build-release --target psx-runtime
-```
+This project was developed with AI assistance. AI assists with code,
+documentation, and investigation; Alex tests the game and makes release
+decisions. Validation claims describe only the tests actually performed.
 
-Zip prefix for CI artifacts: `nightmarecreaturesii`.
+## Credits and licenses
 
-## Symbols
-
-Progressive map: `symbols.toml` → `python3 tools/sync_symbols.py` →
-`psx_symbols.h` (`PSX_FN_*`). See `psxrecomp/docs/SYMBOLS.md`.
-
-## Framework pins
-
-Submodule gitlinks (`psxrecomp`, optional `recomp-ui`, nested `recomp-net`)
-are authoritative. `framework_pins.txt` is an optional scaffold snapshot;
-release CI logs SHAs with `record_pins.sh` but builds whatever the gitlinks
-resolve to. Bump submodules deliberately — do not float on `main`/`master`
-in release CI.
+Framework: [psxrecomp](https://github.com/mstan/psxrecomp), built from the
+pinned fork commit named by the `psxrecomp` submodule. Launcher:
+[recomp-ui](https://github.com/RetroPortingToolKit/recomp-ui), pinned by the
+`recomp-ui` submodule. This kit's own files are under [LICENSE](LICENSE); third-party
+notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), and the framework
+and launcher licenses remain in their source directories. The original game and its
+trademarks belong to their respective owners.
 
 <!-- retcomm-readme-raid -->
 ---
