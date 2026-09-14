@@ -1,0 +1,6 @@
+[submodule "psxrecomp"]
+	path = psxrecomp
+	url = https://github.com/Alexbeav/psxrecomp.git
+[submodule "recomp-ui"]
+	path = recomp-ui
+	url = https://github.com/Alexbeav/recomp-ui.git
