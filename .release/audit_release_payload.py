@@ -49,7 +49,12 @@ PRIVATE_FIXTURE_ALLOWLIST = {
 # Reviewed Wave 3 SDK examples. Bind the complete file bytes so a later edit
 # cannot hide a real developer path behind a broadly exempt documentation name.
 PRIVATE_FIXTURE_HASHES = {
-    "psxrecomp/docs/GAME_PROJECT_SETUP.md": "FB2F038A484942CE0AC46B3471AE66F19CF2DBE1C8F24CEAC5285C888D5C2F78",
+    # Hashes are bound over LF-normalized bytes (see the comparison below): a
+    # Windows checkout with core.autocrlf=true stages CRLF copies of these
+    # files while the CI runners check out LF, and the exemption must not
+    # depend on which machine packaged the kit. Both values are the repository
+    # bytes at the accepted Wave 4 c3 pin.
+    "psxrecomp/docs/GAME_PROJECT_SETUP.md": "0D3E42801DFAA404FBFF6A047CB442BF925394B234170F0036502FBF48AEA70D",
     # Re-bound for the accepted Wave 4 c2 pin (4f534f2cf). Framework commit
     # 837b7a2f4 "Scope private path fixture exceptions" edited this file after
     # the Wave 3 bytes were bound, so the Wave 3 hash no longer matched and the
@@ -60,7 +65,7 @@ PRIVATE_FIXTURE_HASHES = {
     # ships inside release kits and would trip its own private-path gate.
     # Binding the exact bytes keeps the exemption narrow: any later edit to this
     # file fails the audit again.
-    "psxrecomp/runtime/tests/test_setup_private_path_gate.py": "BB0908B24B4457ABA6F29169E622E5E42505C2A7A9E521037A38D974ED4AFF8E",
+    "psxrecomp/runtime/tests/test_setup_private_path_gate.py": "6F890A83A48726DF54B2459BD3BB706B575F819FAF9C768E30273B1F78912DA8",
 }
 
 
@@ -115,7 +120,7 @@ def audit_archive(path: Path, repo: str, expected: dict[str, str]) -> dict[str, 
                 problems.append(f"per-machine mod state: {name}")
             data = archive.read(info)
             if any(pattern.search(data) for pattern in PRIVATE_PATTERNS):
-                if name in PRIVATE_FIXTURE_ALLOWLIST or PRIVATE_FIXTURE_HASHES.get(name) == sha256(data):
+                if name in PRIVATE_FIXTURE_ALLOWLIST or PRIVATE_FIXTURE_HASHES.get(name) == sha256(data.replace(b"\r\n", b"\n")):
                     allowed_private.append(name)
                 else:
                     private_paths.append(name)
