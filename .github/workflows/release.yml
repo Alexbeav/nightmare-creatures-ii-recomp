@@ -234,19 +234,20 @@ jobs:
     - name: Configure & build setup host
       env:
         CMAKE_OSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target || '' }}
-      run: "set -euo pipefail\nEXTRA=()\nif [[ \"$(uname -s)\" == \"Darwin\" ]]; then\n  # Force the pinned static SDL source\
-        \ even if Homebrew already contains SDL.\n  EXTRA+=(\"-DCMAKE_DISABLE_FIND_PACKAGE_SDL3=ON\" \"-DSDL_SHARED=OFF\"\
-        \ \"-DSDL_STATIC=ON\")\nfi\nif [[ -n \"${CMAKE_OSX_DEPLOYMENT_TARGET:-}\" ]]; then\n  EXTRA+=(\"-DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}\"\
-        )\nfi\nif [[ \"$(uname -s)\" != MINGW* && \"$(uname -s)\" != MSYS* ]] && command -v ccache >/dev/null 2>&1; then\n\
-        \  EXTRA+=(\"-DCMAKE_C_COMPILER_LAUNCHER=ccache\")\n  EXTRA+=(\"-DCMAKE_CXX_COMPILER_LAUNCHER=ccache\")\nfi\n# Point\
-        \ CMake at Vulkan headers/glslc. Prefer VULKAN_SDK layout\n# (runtime.cmake checks $VULKAN_SDK first); also seed CMAKE_PREFIX_PATH\n\
-        # so find_path works after the empty-_vk_inc fix in runtime.cmake.\nif [[ \"$(uname -s)\" == \"Darwin\" ]]; then\n\
-        \  BREW_PREFIX=\"$(brew --prefix)\"\n  export PATH=\"${BREW_PREFIX}/bin${PATH:+:${PATH}}\"\n  if command -v brew >/dev/null\
-        \ 2>&1; then\n    SHADERC_PREFIX=\"$(brew --prefix shaderc 2>/dev/null || true)\"\n    VK_HDR_PREFIX=\"$(brew --prefix\
-        \ vulkan-headers 2>/dev/null || true)\"\n    if [[ -n \"${SHADERC_PREFIX}\" && -d \"${SHADERC_PREFIX}/bin\" ]]; then\n\
-        \      export PATH=\"${SHADERC_PREFIX}/bin:${PATH}\"\n    fi\n    for p in \"${VK_HDR_PREFIX}\" \"${SHADERC_PREFIX}\"\
-        \ \"${BREW_PREFIX}\"; do\n      if [[ -n \"${p}\" && -d \"${p}\" ]]; then\n        export CMAKE_PREFIX_PATH=\"${p}${CMAKE_PREFIX_PATH:+:${CMAKE_PREFIX_PATH}}\"\
-        \n      fi\n    done\n  else\n    export CMAKE_PREFIX_PATH=\"${BREW_PREFIX}${CMAKE_PREFIX_PATH:+:${CMAKE_PREFIX_PATH}}\"\
+      run: "set -euo pipefail\nEXTRA=()\nEXTRA+=(\"-DCMAKE_DISABLE_FIND_PACKAGE_Freetype=ON\")\nif [[ \"$(uname -s)\" == \"\
+        Darwin\" ]]; then\n  # Force the pinned static SDL source even if Homebrew already contains SDL.\n  EXTRA+=(\"-DCMAKE_DISABLE_FIND_PACKAGE_SDL3=ON\"\
+        \ \"-DSDL_SHARED=OFF\" \"-DSDL_STATIC=ON\")\nfi\nif [[ -n \"${CMAKE_OSX_DEPLOYMENT_TARGET:-}\" ]]; then\n  EXTRA+=(\"\
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}\")\nfi\nif [[ \"$(uname -s)\" != MINGW* && \"$(uname\
+        \ -s)\" != MSYS* ]] && command -v ccache >/dev/null 2>&1; then\n  EXTRA+=(\"-DCMAKE_C_COMPILER_LAUNCHER=ccache\")\n\
+        \  EXTRA+=(\"-DCMAKE_CXX_COMPILER_LAUNCHER=ccache\")\nfi\n# Point CMake at Vulkan headers/glslc. Prefer VULKAN_SDK\
+        \ layout\n# (runtime.cmake checks $VULKAN_SDK first); also seed CMAKE_PREFIX_PATH\n# so find_path works after the\
+        \ empty-_vk_inc fix in runtime.cmake.\nif [[ \"$(uname -s)\" == \"Darwin\" ]]; then\n  BREW_PREFIX=\"$(brew --prefix)\"\
+        \n  export PATH=\"${BREW_PREFIX}/bin${PATH:+:${PATH}}\"\n  if command -v brew >/dev/null 2>&1; then\n    SHADERC_PREFIX=\"\
+        $(brew --prefix shaderc 2>/dev/null || true)\"\n    VK_HDR_PREFIX=\"$(brew --prefix vulkan-headers 2>/dev/null ||\
+        \ true)\"\n    if [[ -n \"${SHADERC_PREFIX}\" && -d \"${SHADERC_PREFIX}/bin\" ]]; then\n      export PATH=\"${SHADERC_PREFIX}/bin:${PATH}\"\
+        \n    fi\n    for p in \"${VK_HDR_PREFIX}\" \"${SHADERC_PREFIX}\" \"${BREW_PREFIX}\"; do\n      if [[ -n \"${p}\"\
+        \ && -d \"${p}\" ]]; then\n        export CMAKE_PREFIX_PATH=\"${p}${CMAKE_PREFIX_PATH:+:${CMAKE_PREFIX_PATH}}\"\n\
+        \      fi\n    done\n  else\n    export CMAKE_PREFIX_PATH=\"${BREW_PREFIX}${CMAKE_PREFIX_PATH:+:${CMAKE_PREFIX_PATH}}\"\
         \n  fi\n  if [[ -f \"${BREW_PREFIX}/include/vulkan/vulkan.h\" ]]; then\n    export VULKAN_SDK=\"${BREW_PREFIX}\"\n\
         \  elif [[ -n \"${VK_HDR_PREFIX:-}\" && -f \"${VK_HDR_PREFIX}/include/vulkan/vulkan.h\" ]]; then\n    export VULKAN_SDK=\"\
         ${VK_HDR_PREFIX}\"\n  fi\nelif [[ \"$(uname -s)\" == \"Linux\" ]]; then\n  if [[ -z \"${VULKAN_SDK:-}\" && -f /usr/include/vulkan/vulkan.h\
@@ -403,5 +404,3 @@ jobs:
     permissions:
       contents: read
     timeout-minutes: 90
-
-# Workflow file touched on 2026-09-14 so GitHub Actions indexes it; no behavioural change.
